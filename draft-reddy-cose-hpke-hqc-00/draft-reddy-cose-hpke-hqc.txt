@@ -1,0 +1,623 @@
+
+
+
+
+CBOR Object Signing and Encryption                         H. Tschofenig
+Internet-Draft                                                  UniBw M.
+Intended status: Standards Track                                T. Reddy
+Expires: 17 April 2027                                             Nokia
+                                                         14 October 2026
+
+
+         Hamming Quasi-Cyclic (HQC) Ciphersuites for COSE-HPKE
+                    draft-reddy-cose-hpke-hqc-latest
+
+Abstract
+
+   This document specifies Hamming Quasi-Cyclic (HQC)-based ciphersuites
+   for use with COSE-HPKE.  It defines fully specified COSE algorithms
+   for HPKE Integrated Encryption and HPKE Key Encryption, using HQC or
+   PQ/T hybrid HQC key encapsulation, SHAKE256 key derivation, and AES-
+   256-GCM authenticated encryption.  It specifies their AKP key
+   representation and requests twelve COSE algorithm registrations.
+   Message processing and context binding are inherited from COSE-HPKE.
+
+Discussion Venues
+
+   This note is to be removed before publishing as an RFC.
+
+   Discussion of this document takes place on the CBOR Object Signing
+   and Encryption Working Group mailing list (cose@ietf.org), which is
+   archived at https://mailarchive.ietf.org/arch/browse/cose/.
+
+   Source for this draft and an issue tracker can be found at
+   https://github.com/hannestschofenig/draft-reddy-cose-hpke-hqc.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 17 April 2027.
+
+Copyright Notice
+
+   Copyright (c) 2026 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction
+   2.  Conventions and Terminology
+   3.  Ciphersuites
+   4.  Key Representation
+   5.  Processing Requirements
+     5.1.  Integrated Encryption
+     5.2.  Key Encryption
+     5.3.  Base and PSK Authentication Modes
+     5.4.  Failure Handling
+   6.  Security Considerations
+   7.  IANA Considerations
+   8.  References
+     8.1.  Normative References
+     8.2.  Informative References
+   Appendix A.  Example
+     A.1.  AKP Public Key
+     A.2.  Integrated Encryption in Base Mode
+     A.3.  Key Encryption in Base Mode
+   Authors' Addresses
+
+1.  Introduction
+
+   COSE-HPKE [COSE-HPKE] embeds Hybrid Public Key Encryption [HPKE] in
+   CBOR Object Signing and Encryption (COSE) [RFC9052].  A COSE-HPKE
+   algorithm identifier selects a complete HPKE ciphersuite and a COSE
+   usage mode.
+
+   This document adds ciphersuites using the KEMs of [HQC-HPKE]: HQC-1,
+   HQC-3, and HQC-5, and the PQ/T hybrid [RFC9794] KEMs HQC3-P256,
+   HQC3-X25519, and HQC5-P384.  Each KEM is combined with the SHAKE256
+   KDF of [PQ-HPKE] and AES-256-GCM.  Separate COSE algorithms identify
+   Integrated Encryption and Key Encryption.
+
+   The document does not change the COSE-HPKE message formats, HPKE key
+   schedule, or existing header parameters.  It is also separate from
+   direct PQ-KEM-for-COSE constructions using an external KDF and AES
+   Key Wrap; their algorithm identifiers and key-use conventions do not
+   apply here.
+
+2.  Conventions and Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in
+   BCP 14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+   The notation of [HPKE] and [COSE-HPKE] applies. enc is the HPKE
+   encapsulation output.  The COSE ek header carries that output and not
+   a recipient public key. ct is the HPKE AEAD ciphertext.  A CEK is a
+   content-encryption key used in the next lower COSE layer.
+
+   "Integrated" and "Key Encryption" refer to the two COSE-HPKE usage
+   modes.  "Base" and "PSK" refer to HPKE authentication modes.  These
+   are independent choices; a COSE usage-mode identifier does not select
+   between Base and PSK.
+
+3.  Ciphersuites
+
+   The twelve ciphersuites are defined in Table 1.  Each row selects
+   exactly one COSE usage mode and one HPKE triple (kem_id, kdf_id,
+   aead_id).  Implementations MUST NOT substitute another KDF, AEAD, or
+   KEM under the same COSE algorithm identifier.
+
+   +===================+=======================+==========+===========+
+   |COSE name          |COSE value             |Mode      |HPKE KEM   |
+   +===================+=======================+==========+===========+
+   |HPKE-HQC-1         |TBD-COSE-HQC-1         |Integrated|HQC-1      |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC-3         |TBD-COSE-HQC-3         |Integrated|HQC-3      |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC-5         |TBD-COSE-HQC-5         |Integrated|HQC-5      |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC3-P256     |TBD-COSE-HQC3-P256     |Integrated|HQC3-P256  |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC3-X25519   |TBD-COSE-HQC3-X25519   |Integrated|HQC3-X25519|
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC5-P384     |TBD-COSE-HQC5-P384     |Integrated|HQC5-P384  |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC-1-KE      |TBD-COSE-HQC-1-KE      |Key       |HQC-1      |
+   |                   |                       |Encryption|           |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC-3-KE      |TBD-COSE-HQC-3-KE      |Key       |HQC-3      |
+   |                   |                       |Encryption|           |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC-5-KE      |TBD-COSE-HQC-5-KE      |Key       |HQC-5      |
+   |                   |                       |Encryption|           |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC3-P256-KE  |TBD-COSE-HQC3-P256-KE  |Key       |HQC3-P256  |
+   |                   |                       |Encryption|           |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC3-X25519-KE|TBD-COSE-HQC3-X25519-KE|Key       |HQC3-X25519|
+   |                   |                       |Encryption|           |
+   +-------------------+-----------------------+----------+-----------+
+   |HPKE-HQC5-P384-KE  |TBD-COSE-HQC5-P384-KE  |Key       |HQC5-P384  |
+   |                   |                       |Encryption|           |
+   +-------------------+-----------------------+----------+-----------+
+
+                    Table 1: HQC COSE-HPKE algorithms
+
+   For every row, the HPKE KDF is SHAKE256 (kdf_id = 0x0011) as defined
+   in [PQ-HPKE], and the HPKE AEAD is AES-256-GCM (aead_id = 0x0002) as
+   defined in [HPKE].  The kem_id is the corresponding allocation
+   requested by [HQC-HPKE].
+
+   SHAKE256 is selected because HQC-KEM uses SHAKE256 internally,
+   following the guidance in Section 7.1 of [COSE-HPKE] that the KDF
+   match one used by the KEM where possible.  A single KDF and AEAD
+   limits the initial suite count while allowing all HQC KEMs.
+
+4.  Key Representation
+
+   Keys MUST use the Algorithm Key Pair (AKP) key type of [RFC9964] and
+   the raw HPKE key mapping specified in Section 3.4 of [COSE-HPKE].
+
+       +===========+=======+======================================+
+       | Parameter | Label | Requirement                          |
+       +===========+=======+======================================+
+       | kty       |     1 | Integer 7 (AKP)                      |
+       +-----------+-------+--------------------------------------+
+       | alg       |     3 | COSE algorithm value                 |
+       +-----------+-------+--------------------------------------+
+       | pub       |    -1 | HPKE SerializePublicKey output, bstr |
+       +-----------+-------+--------------------------------------+
+       | priv      |    -2 | HPKE SerializePrivateKey output,     |
+       |           |       | bstr, private keys only              |
+       +-----------+-------+--------------------------------------+
+
+                     Table 2: HQC COSE_Key parameters
+
+   The alg field MUST be present and MUST identify the ciphersuite for
+   which the key is used.  It MUST match the selected COSE-HPKE
+   algorithm.  This is a complete ciphersuite binding, not merely a KEM
+   binding: HPKE-HQC-1 and HPKE-HQC-1-KE identify different key objects.
+
+   The pub length for each KEM is given in Table 3.  The priv value,
+   when present, is the 32-octet seed serialization defined by
+   [HQC-HPKE].  Expanded private keys MUST NOT be placed in priv.
+   Public-key objects MUST NOT contain priv.  No crv parameter is used.
+
+               +=============+==============+=============+
+               | HPKE KEM    | pub (octets) | ek (octets) |
+               +=============+==============+=============+
+               | HQC-1       |         2241 |        4433 |
+               +-------------+--------------+-------------+
+               | HQC-3       |         4514 |        8978 |
+               +-------------+--------------+-------------+
+               | HQC-5       |         7237 |       14421 |
+               +-------------+--------------+-------------+
+               | HQC3-P256   |         4579 |        9043 |
+               +-------------+--------------+-------------+
+               | HQC3-X25519 |         4546 |        9010 |
+               +-------------+--------------+-------------+
+               | HQC5-P384   |         7334 |       14518 |
+               +-------------+--------------+-------------+
+
+                 Table 3: Public key and encapsulated key
+                                 lengths
+
+   Implementations MUST perform the deserialization and consistency
+   checks specified by [HQC-HPKE], including rejection of an imported
+   seed and public-key pair that do not match.  The parameter set MUST
+   be determined from alg, not inferred from a byte-string length alone.
+
+   If key_ops (label 4) is present, it MUST be [8] (derive bits) for a
+   private key and [] for a public key, as required by Section 3.4 of
+   [COSE-HPKE].  This is not a deriveKey permission and does not
+   authorize use of the HQC key as a symmetric key.
+
+   AKP thumbprints follow Section 6 of [RFC9964].  They include the COSE
+   algorithm value, so two ciphersuite bindings do not have the same
+   thumbprint merely because their public-key bytes are identical.
+
+5.  Processing Requirements
+
+   The processing of [COSE-HPKE] applies with the algorithms from
+   Section 3 and the key mapping in Section 4.  Only the HPKE Single-
+   Shot APIs are used.  A new HPKE operation, with fresh encapsulation
+   randomness, MUST be used for each independently encrypted message or
+   recipient.  Reusing a provisioned recipient public key is distinct
+   from reusing encapsulation randomness or an HPKE encryption context.
+
+   If the alg header is present, it MUST be protected and MUST match the
+   selected suite.  When it is omitted as permitted by [COSE-HPKE], the
+   suite MUST be unambiguously established by the application context
+   and MUST still match the key's mandatory alg.  A receiver MUST NOT
+   try different suites until one decrypts successfully.
+
+   The ek header MUST contain the raw HPKE enc output as a byte string
+   in the unprotected header of the structure performing HPKE.  Its
+   expected length is given in Table 3.  A missing header, incorrect
+   type, or incorrect length MUST be rejected before invoking
+   decapsulation.  The checks of [HQC-HPKE] apply in addition to these
+   COSE checks.
+
+5.1.  Integrated Encryption
+
+   The algorithms without the -KE suffix MUST be used only with the
+   Integrated Encryption processing of Section 3.2 of [COSE-HPKE].  This
+   mode uses COSE_Encrypt0 and has one recipient.
+
+   HPKE encrypts the raw content.  The inputs and outputs are mapped as
+   specified by the base document:
+
+   *  info is empty unless the application supplies the same external
+      value to both parties.
+
+   *  aad is the encoded COSE Enc_structure with context Encrypt0, the
+      protected-header byte string, and the application's external AAD.
+
+   *  pt is the content to encrypt.
+
+   *  enc is carried in the unprotected ek header.
+
+   *  ct is the COSE_Encrypt0 ciphertext, or the detached ciphertext
+      when that field is null.
+
+   HPKE manages the AEAD key and nonce internally.
+
+5.2.  Key Encryption
+
+   The algorithms with the -KE suffix MUST be used only with the Key
+   Encryption processing of Section 3.3 of [COSE-HPKE].  A COSE_Encrypt
+   contains the content encrypted with an independently generated CEK.
+   Each COSE_Recipient uses HPKE to encrypt that CEK for its recipient.
+
+   The info input is the Recipient_structure of the base document,
+   encoded according to the Core Deterministic Encoding Requirements in
+   Section 4.2.1 of [RFC8949].  Its four members bind the HPKE recipient
+   context, the algorithm of the next lower COSE layer, the exact
+   recipient protected-header bytes, and any agreed recipient extra
+   information.  The next_layer_alg value MUST match the algorithm of
+   that lower layer.  Deterministic encoding applies to the structure,
+   not to re-encoding the protected-header bytes it contains.
+
+   The HPKE aad input SHOULD be empty, with any additional data handled
+   as specified in Section 3.3.4 of [COSE-HPKE].  The HPKE plaintext is
+   the CEK.  The encapsulation output is placed in the recipient's
+   unprotected ek header, and the HPKE ciphertext is placed in that
+   recipient's ciphertext field.
+
+   The HPKE AEAD of these suites is always AES-256-GCM and encrypts the
+   CEK.  The selected outer algorithm determines the CEK length and its
+   own nonce and usage requirements.  There is no AES Key Wrap step and
+   no COSE_KDF_Context in this processing.
+
+   The receiver uses HPKE Open to recover the CEK, checks that its
+   length is appropriate for the next layer, and processes that layer
+   according to COSE.  A failed HPKE Open or failed content
+   authentication MUST NOT result in plaintext release.  Each recipient
+   receives an independent encapsulation and encrypted copy of the CEK.
+
+5.3.  Base and PSK Authentication Modes
+
+   Both COSE usage modes support HPKE Base and PSK.  Following
+   [COSE-HPKE], a protected psk_id selects PSK mode; its absence selects
+   Base mode.  The PSK is provided externally and MUST NOT be included
+   in the COSE structure.  Its provisioning, entropy, and matching
+   requirements are those of [HPKE].
+
+   No additional COSE algorithm identifiers are required for PSK mode.
+
+5.4.  Failure Handling
+
+   The explicit errors and implicit-rejection behavior of [HQC-HPKE] and
+   [HPKE] apply.  Implementations MUST NOT turn the internal HQC
+   consistency check into a distinguishable COSE rejection signal.
+   Implicit rejection continues through HPKE; authentication failure is
+   handled through the normal Open path.  Explicit parse or KEM failures
+   stop the operation without releasing content or a CEK.
+
+6.  Security Considerations
+
+   The security considerations of [HQC-HPKE], [HPKE], [PQ-HPKE],
+   [COSE-HPKE], and [RFC9052] apply.  This document selects and encodes
+   ciphersuites; it does not supply an independent proof of HQC or HPKE.
+
+   The protected headers, Recipient_structure, and the distinction
+   between HPKE info and aad MUST be handled exactly as specified by
+   [COSE-HPKE].  Replacing that structure with the context from another
+   COSE key-distribution mechanism can remove intended algorithm binding
+   and produces a different construction.
+
+   Applications MUST constrain algorithm selection by policy and MUST
+   NOT silently fall back to another KEM, ciphersuite, or HQC revision
+   after decryption failure.  Selection of a high-category KEM does not
+   remove limits imposed by a content algorithm, KDF, AEAD, PSK, or
+   implementation.
+
+   Multiple recipients do not form a hybrid KEM.  If HQC and ML-KEM
+   recipients independently protect the same CEK, either recipient's
+   private key is sufficient to recover it.  Confidentiality therefore
+   depends on every enabled recovery path.  Applications requiring
+   security when one KEM fails can use the PQ/T hybrid ciphersuites in
+   Section 3.
+
+   Base mode does not authenticate the sender.  A kid is a lookup hint,
+   not a substitute for authenticated public-key distribution.  Sender
+   authentication can be provided by the PSK mode or suitable COSE-
+   native mechanisms as described by the base document.  Long-term
+   recipient key compromise permits recovery of recorded messages.
+
+   Fresh randomness is required for encapsulation and for CEK generation
+   in Key Encryption mode.  The 32-octet private seed is secret key
+   material and implementations MUST protect it and all expanded keys
+   and intermediate shared secrets against disclosure.
+
+   Message-size limits need to account for the entire encoded COSE
+   object, not just the plaintext.  In Key Encryption mode, each HQC
+   recipient adds its KEM ciphertext and an encrypted CEK.
+   Implementations SHOULD bound parsing, reassembly, memory allocation,
+   and decapsulation work.  Detached content does not eliminate the per-
+   recipient KEM ciphertext overhead.
+
+7.  IANA Considerations
+
+   IANA is requested to add the following twelve entries to the "COSE
+   Algorithms" registry [COSE-IANA].  The entries are fully specified by
+   Section 3.  For every entry, the KDF is HPKE SHAKE256 (0x0011) and
+   the AEAD is HPKE AES-256-GCM (0x0002).
+
+   +=====================+=========================+==================+
+   | Name                | Value                   | Description      |
+   +=====================+=========================+==================+
+   | HPKE-HQC-1          | TBD-COSE-HQC-1          | Integrated       |
+   |                     |                         | Encryption: HQC- |
+   |                     |                         | 1, SHAKE256,     |
+   |                     |                         | AES-256-GCM      |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC-3          | TBD-COSE-HQC-3          | Integrated       |
+   |                     |                         | Encryption: HQC- |
+   |                     |                         | 3, SHAKE256,     |
+   |                     |                         | AES-256-GCM      |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC-5          | TBD-COSE-HQC-5          | Integrated       |
+   |                     |                         | Encryption: HQC- |
+   |                     |                         | 5, SHAKE256,     |
+   |                     |                         | AES-256-GCM      |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC3-P256      | TBD-COSE-HQC3-P256      | Integrated       |
+   |                     |                         | Encryption:      |
+   |                     |                         | HQC3-P256,       |
+   |                     |                         | SHAKE256, AES-   |
+   |                     |                         | 256-GCM          |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC3-X25519    | TBD-COSE-HQC3-X25519    | Integrated       |
+   |                     |                         | Encryption:      |
+   |                     |                         | HQC3-X25519,     |
+   |                     |                         | SHAKE256, AES-   |
+   |                     |                         | 256-GCM          |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC5-P384      | TBD-COSE-HQC5-P384      | Integrated       |
+   |                     |                         | Encryption:      |
+   |                     |                         | HQC5-P384,       |
+   |                     |                         | SHAKE256, AES-   |
+   |                     |                         | 256-GCM          |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC-1-KE       | TBD-COSE-HQC-1-KE       | Key Encryption:  |
+   |                     |                         | HQC-1, SHAKE256, |
+   |                     |                         | AES-256-GCM      |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC-3-KE       | TBD-COSE-HQC-3-KE       | Key Encryption:  |
+   |                     |                         | HQC-3, SHAKE256, |
+   |                     |                         | AES-256-GCM      |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC-5-KE       | TBD-COSE-HQC-5-KE       | Key Encryption:  |
+   |                     |                         | HQC-5, SHAKE256, |
+   |                     |                         | AES-256-GCM      |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC3-P256-KE   | TBD-COSE-HQC3-P256-KE   | Key Encryption:  |
+   |                     |                         | HQC3-P256,       |
+   |                     |                         | SHAKE256, AES-   |
+   |                     |                         | 256-GCM          |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC3-X25519-KE | TBD-COSE-HQC3-X25519-KE | Key Encryption:  |
+   |                     |                         | HQC3-X25519,     |
+   |                     |                         | SHAKE256, AES-   |
+   |                     |                         | 256-GCM          |
+   +---------------------+-------------------------+------------------+
+   | HPKE-HQC5-P384-KE   | TBD-COSE-HQC5-P384-KE   | Key Encryption:  |
+   |                     |                         | HQC5-P384,       |
+   |                     |                         | SHAKE256, AES-   |
+   |                     |                         | 256-GCM          |
+   +---------------------+-------------------------+------------------+
+
+                                 Table 4
+
+   The following fields apply to every row:
+
+   *  Capabilities: [kty]
+
+   *  Change Controller: IESG
+
+   *  Reference: this document, Section 3, Section 4, and Section 5
+
+   *  Recommended: No
+
+   The corresponding HPKE KEM ID in each description is the identifier
+   assigned to that KEM by [HQC-HPKE].  Those values MUST be resolved in
+   Section 3 before publication.
+
+   The existing AKP key type and the ek and psk_id parameters defined by
+   [COSE-HPKE] are reused.
+
+8.  References
+
+8.1.  Normative References
+
+   [COSE-HPKE]
+              Tschofenig, H., Jones, M. B., Steele, O., Daisuke, A., and
+              L. Lundblade, "Use of Hybrid Public-Key Encryption (HPKE)
+              with CBOR Object Signing and Encryption (COSE)", Work in
+              Progress, Internet-Draft, draft-ietf-cose-hpke-27, 12
+              September 2026, <https://datatracker.ietf.org/doc/html/
+              draft-ietf-cose-hpke-27>.
+
+   [HPKE]     Barnes, R., Bhargavan, K., Lipp, B., and C. A. Wood,
+              "Hybrid Public Key Encryption", Work in Progress,
+              Internet-Draft, draft-ietf-hpke-hpke-05, 25 September
+              2026, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              hpke-hpke-05>.
+
+   [HQC-HPKE] Tschofenig, H. and T. Reddy.K, "Hamming Quasi-Cyclic (HQC)
+              Key Encapsulation Mechanisms for Hybrid Public Key
+              Encryption (HPKE)", Work in Progress, Internet-Draft,
+              draft-reddy-hpke-hqc-01, 14 October 2026,
+              <https://datatracker.ietf.org/doc/html/draft-reddy-hpke-
+              hqc-01>.
+
+   [PQ-HPKE]  Barnes, R. and D. Connolly, "Post-Quantum and Post-
+              Quantum/Traditional Hybrid Algorithms for HPKE", Work in
+              Progress, Internet-Draft, draft-ietf-hpke-pq-05, 6 July
+              2026, <https://datatracker.ietf.org/doc/html/draft-ietf-
+              hpke-pq-05>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/rfc/rfc2119>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/rfc/rfc8174>.
+
+   [RFC8949]  Bormann, C. and P. Hoffman, "Concise Binary Object
+              Representation (CBOR)", STD 94, RFC 8949,
+              DOI 10.17487/RFC8949, December 2020,
+              <https://www.rfc-editor.org/rfc/rfc8949>.
+
+   [RFC9052]  Schaad, J., "CBOR Object Signing and Encryption (COSE):
+              Structures and Process", STD 96, RFC 9052,
+              DOI 10.17487/RFC9052, August 2022,
+              <https://www.rfc-editor.org/rfc/rfc9052>.
+
+   [RFC9964]  Prorock, M. and O. Steele, "ML-DSA for JSON Object Signing
+              and Encryption (JOSE) and CBOR Object Signing and
+              Encryption (COSE)", RFC 9964, DOI 10.17487/RFC9964, May
+              2026, <https://www.rfc-editor.org/rfc/rfc9964>.
+
+8.2.  Informative References
+
+   [COSE-IANA]
+              IANA, "CBOR Object Signing and Encryption (COSE)", n.d.,
+              <https://www.iana.org/assignments/cose/>.
+
+   [RFC9794]  Driscoll, F., Parsons, M., and B. Hale, "Terminology for
+              Post-Quantum Traditional Hybrid Schemes", RFC 9794,
+              DOI 10.17487/RFC9794, June 2025,
+              <https://www.rfc-editor.org/rfc/rfc9794>.
+
+Appendix A.  Example
+
+   These examples are pseudocode, not executable CBOR diagnostic
+   notation or cryptographic test vectors. encode denotes CBOR encoding,
+   bstr(name) denotes the byte string held in name, and symbolic
+   algorithm and header identifiers stand for integer assignments.  EK
+   and PSK_ID denote the header labels assigned by [COSE-HPKE].
+
+   A future version of this specification will provide working examples.
+
+A.1.  AKP Public Key
+
+   {
+      1: 7,                         / AKP /
+      3: TBD-COSE-HQC-1,
+      4: [],                        / optional key_ops /
+     -1: bstr(pk)                   / 2241 octets /
+   }
+
+   A corresponding private-key object includes -2: bstr(seed) with 32
+   octets and, if key_ops is present, replaces [] with [8].  A Key
+   Encryption object uses its own matching -KE algorithm binding.
+
+A.2.  Integrated Encryption in Base Mode
+
+   16([
+     encode({1: TBD-COSE-HQC-1}),
+     {4: bstr(kid), EK: bstr(enc)},
+     bstr(ct)
+   ])
+
+   The tag is the optional COSE_Encrypt0 tag. enc has 4433 octets.  The
+   protected bytes shown are also used in Enc_structure, which is passed
+   as HPKE AAD. ct contains the encrypted content and its 16-octet AES-
+   GCM authentication tag.  No external COSE IV is needed for the HPKE
+   operation.
+
+A.3.  Key Encryption in Base Mode
+
+   96([
+     encode({1: 3}),                 / outer A256GCM /
+     {5: bstr(content_iv)},
+     bstr(encrypted_content),
+     [
+       [
+         encode({1: TBD-COSE-HQC-5-KE, 4: bstr(kid)}),
+         {EK: bstr(enc)},
+         bstr(encrypted_cek)
+       ]
+     ]
+   ])
+
+   Here the independent CEK has 32 octets and content_iv has 12 octets.
+   For the HQC-5 recipient, enc has 14421 octets. encrypted_cek has 48
+   octets: the encrypted 32-octet CEK followed by the 16-octet HPKE AES-
+   GCM tag.  The recipient's info is the deterministic encoding of:
+
+   [
+     "HPKE Recipient",
+     3,
+     encode({1: TBD-COSE-HQC-5-KE, 4: bstr(kid)}),
+     h''
+   ]
+
+   The protected-header byte string MUST be the same one transmitted in
+   the recipient, not a separately re-encoded equivalent map.  To use
+   PSK mode, add PSK_ID: bstr(psk_id) to that protected map and supply
+   the corresponding PSK externally.  This also changes the bytes in
+   info.
+
+Authors' Addresses
+
+   Hannes Tschofenig
+   University of the Bundeswehr Munich
+   85577 Neubiberg
+   Germany
+   Email: hannes.tschofenig@gmx.net
+
+
+   Tirumaleswar Reddy
+   Nokia
+   Bangalore
+   Karnataka
+   India
+   Email: kondtir@gmail.com
