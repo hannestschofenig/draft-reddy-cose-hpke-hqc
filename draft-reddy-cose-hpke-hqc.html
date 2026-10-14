@@ -11,11 +11,11 @@
        This document specifies Hamming Quasi-Cyclic (HQC)-based ciphersuites
 for use with COSE-HPKE.
 It defines fully specified COSE algorithms for HPKE Integrated
-Encryption and HPKE Key Encryption, using HQC key encapsulation,
-SHAKE256 key derivation, and AES-256-GCM authenticated encryption.
-It specifies their AKP key representation and requests six COSE
-algorithm registrations. Message processing and context binding are
-inherited from COSE-HPKE. 
+Encryption and HPKE Key Encryption, using HQC or PQ/T hybrid HQC key
+encapsulation, SHAKE256 key derivation, and AES-256-GCM authenticated
+encryption. It specifies their AKP key representation and requests
+twelve COSE algorithm registrations. Message processing and context
+binding are inherited from COSE-HPKE. 
     " name="description">
 <meta content="xml2rfc 3.34.1" name="generator">
 <meta content="HQC" name="keyword">
@@ -1056,7 +1056,7 @@ svg {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Tschofenig &amp; Reddy</td>
-<td class="center">Expires 14 April 2027</td>
+<td class="center">Expires 17 April 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1064,17 +1064,17 @@ svg {
 <div id="internal-metadata" class="document-information">
 <dl id="identifiers">
 <dt class="label-workgroup">Workgroup:</dt>
-<dd class="workgroup">COSE</dd>
+<dd class="workgroup">CBOR Object Signing and Encryption</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
 <dd class="internet-draft">draft-reddy-cose-hpke-hqc-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-10-11" class="published">11 October 2026</time>
+<time datetime="2026-10-14" class="published">14 October 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Standards Track</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2027-04-14">14 April 2027</time></dd>
+<dd class="expires"><time datetime="2027-04-17">17 April 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1094,11 +1094,22 @@ svg {
 <p id="section-abstract-1">This document specifies Hamming Quasi-Cyclic (HQC)-based ciphersuites
 for use with COSE-HPKE.
 It defines fully specified COSE algorithms for HPKE Integrated
-Encryption and HPKE Key Encryption, using HQC key encapsulation,
-SHAKE256 key derivation, and AES-256-GCM authenticated encryption.
-It specifies their AKP key representation and requests six COSE
-algorithm registrations. Message processing and context binding are
-inherited from COSE-HPKE.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+Encryption and HPKE Key Encryption, using HQC or PQ/T hybrid HQC key
+encapsulation, SHAKE256 key derivation, and AES-256-GCM authenticated
+encryption. It specifies their AKP key representation and requests
+twelve COSE algorithm registrations. Message processing and context
+binding are inherited from COSE-HPKE.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-discussion-venues">
+<a href="#name-discussion-venues" class="section-name selfRef">Discussion Venues</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">Discussion of this document takes place on the
+    CBOR Object Signing and Encryption Working Group mailing list (cose@ietf.org),
+    which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/cose/">https://mailarchive.ietf.org/arch/browse/cose/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+    <span><a href="https://github.com/hannestschofenig/draft-reddy-cose-hpke-hqc">https://github.com/hannestschofenig/draft-reddy-cose-hpke-hqc</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1119,7 +1130,7 @@ inherited from COSE-HPKE.<a href="#section-abstract-1" class="pilcrow">¶</a></p
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 14 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 17 April 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1224,15 +1235,16 @@ inherited from COSE-HPKE.<a href="#section-abstract-1" class="pilcrow">¶</a></p
 in CBOR Object Signing and Encryption (COSE) <span>[<a href="#RFC9052" class="cite xref">RFC9052</a>]</span>. A COSE-HPKE
 algorithm identifier selects a complete HPKE ciphersuite and a COSE
 usage mode.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">This document adds ciphersuites using the HQC KEMs of <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>.
-Each of HQC-1, HQC-3, and HQC-5 is combined with the SHAKE256 KDF of
-<span>[<a href="#PQ-HPKE" class="cite xref">PQ-HPKE</a>]</span> and AES-256-GCM. Separate COSE algorithms identify
-Integrated Encryption and Key Encryption.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-2">This document adds ciphersuites using the KEMs of <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>:
+HQC-1, HQC-3, and HQC-5, and the PQ/T hybrid <span>[<a href="#RFC9794" class="cite xref">RFC9794</a>]</span> KEMs
+HQC3-P256, HQC3-X25519, and HQC5-P384. Each KEM is combined with the
+SHAKE256 KDF of <span>[<a href="#PQ-HPKE" class="cite xref">PQ-HPKE</a>]</span> and AES-256-GCM. Separate COSE
+algorithms identify Integrated Encryption and Key Encryption.<a href="#section-1-2" class="pilcrow">¶</a></p>
 <p id="section-1-3">The document does not change the COSE-HPKE message formats, HPKE key
-schedule, or existing header parameters. It does not define a hybrid
-combination of HQC and another KEM. It is also separate from direct
-PQ-KEM-for-COSE constructions using an external KDF and AES Key Wrap;
-their algorithm identifiers and key-use conventions do not apply here.<a href="#section-1-3" class="pilcrow">¶</a></p>
+schedule, or existing header parameters. It is also separate from
+direct PQ-KEM-for-COSE constructions using an external KDF and AES Key
+Wrap; their algorithm identifiers and key-use conventions do not apply
+here.<a href="#section-1-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="conventions-and-terminology">
@@ -1259,10 +1271,10 @@ between Base and PSK.<a href="#section-2-3" class="pilcrow">¶</a></p>
       <h2 id="name-ciphersuites">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-ciphersuites" class="section-name selfRef">Ciphersuites</a>
       </h2>
-<p id="section-3-1">The six ciphersuites are defined in <a href="#suite-table" class="auto internal xref">Table 1</a>. Each row selects
-exactly one COSE usage mode and one HPKE triple <code>(kem_id, kdf_id,
-aead_id)</code>. Implementations <span class="bcp14">MUST NOT</span> substitute another KDF, AEAD, or
-HQC parameter set under the same COSE algorithm identifier.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-1">The twelve ciphersuites are defined in <a href="#suite-table" class="auto internal xref">Table 1</a>. Each row
+selects exactly one COSE usage mode and one HPKE triple <code>(kem_id,
+kdf_id, aead_id)</code>. Implementations <span class="bcp14">MUST NOT</span> substitute another KDF,
+AEAD, or KEM under the same COSE algorithm identifier.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <span id="name-hqc-cose-hpke-algorithms"></span><div id="suite-table">
 <table class="center" id="table-1">
         <caption>
@@ -1297,6 +1309,24 @@ HQC parameter set under the same COSE algorithm identifier.<a href="#section-3-1
             <td class="text-left" rowspan="1" colspan="1">HQC-5</td>
           </tr>
           <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC3-P256</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC3-P256</td>
+            <td class="text-left" rowspan="1" colspan="1">Integrated</td>
+            <td class="text-left" rowspan="1" colspan="1">HQC3-P256</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC3-X25519</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC3-X25519</td>
+            <td class="text-left" rowspan="1" colspan="1">Integrated</td>
+            <td class="text-left" rowspan="1" colspan="1">HQC3-X25519</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC5-P384</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC5-P384</td>
+            <td class="text-left" rowspan="1" colspan="1">Integrated</td>
+            <td class="text-left" rowspan="1" colspan="1">HQC5-P384</td>
+          </tr>
+          <tr>
             <td class="text-left" rowspan="1" colspan="1">HPKE-HQC-1-KE</td>
             <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC-1-KE</td>
             <td class="text-left" rowspan="1" colspan="1">Key Encryption</td>
@@ -1314,15 +1344,35 @@ HQC parameter set under the same COSE algorithm identifier.<a href="#section-3-1
             <td class="text-left" rowspan="1" colspan="1">Key Encryption</td>
             <td class="text-left" rowspan="1" colspan="1">HQC-5</td>
           </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC3-P256-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC3-P256-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">Key Encryption</td>
+            <td class="text-left" rowspan="1" colspan="1">HQC3-P256</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC3-X25519-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC3-X25519-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">Key Encryption</td>
+            <td class="text-left" rowspan="1" colspan="1">HQC3-X25519</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC5-P384-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC5-P384-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">Key Encryption</td>
+            <td class="text-left" rowspan="1" colspan="1">HQC5-P384</td>
+          </tr>
         </tbody>
       </table>
 </div>
 <p id="section-3-3">For every row, the HPKE KDF is SHAKE256 (<code>kdf_id = 0x0011</code>) as defined
 in <span>[<a href="#PQ-HPKE" class="cite xref">PQ-HPKE</a>]</span>, and the HPKE AEAD is AES-256-GCM (<code>aead_id = 0x0002</code>)
-as defined in <span>[<a href="#HPKE" class="cite xref">HPKE</a>]</span>. The <code>kem_id</code> is the corresponding HQC-1,
-HQC-3, or HQC-5 allocation requested by <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>.<a href="#section-3-3" class="pilcrow">¶</a></p>
-<p id="section-3-4">The selection of SHAKE256 and AES-256-GCM limits the initial suite
-count while allowing all three HQC parameter sets.<a href="#section-3-4" class="pilcrow">¶</a></p>
+as defined in <span>[<a href="#HPKE" class="cite xref">HPKE</a>]</span>. The <code>kem_id</code> is the corresponding allocation
+requested by <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-4">SHAKE256 is selected because HQC-KEM uses SHAKE256 internally,
+following the guidance in Section 7.1 of <span>[<a href="#COSE-HPKE" class="cite xref">COSE-HPKE</a>]</span> that the KDF
+match one used by the KEM where possible. A single KDF and AEAD
+limits the initial suite count while allowing all HQC KEMs.<a href="#section-3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="keys">
@@ -1373,22 +1423,69 @@ the raw HPKE key mapping specified in Section 3.4 of <span>[<a href="#COSE-HPKE"
 which the key is used. It <span class="bcp14">MUST</span> match the selected COSE-HPKE algorithm.
 This is a complete ciphersuite binding, not merely a KEM binding:
 HPKE-HQC-1 and HPKE-HQC-1-KE identify different key objects.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">The <code>pub</code> value has length 2241, 4514, or 7237 octets for HQC-1,
-HQC-3, or HQC-5, respectively. The <code>priv</code> value, when present, is the
-32-octet seed serialization defined by <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>. Expanded private
-keys <span class="bcp14">MUST NOT</span> be placed in <code>priv</code>. Public-key objects <span class="bcp14">MUST NOT</span> contain
-<code>priv</code>. No <code>crv</code> parameter is used.<a href="#section-4-4" class="pilcrow">¶</a></p>
-<p id="section-4-5">Implementations <span class="bcp14">MUST</span> perform the deserialization and consistency checks
+<p id="section-4-4">The <code>pub</code> length for each KEM is given in <a href="#len-table" class="auto internal xref">Table 3</a>. The <code>priv</code>
+value, when present, is the 32-octet seed serialization defined by
+<span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>. Expanded private keys <span class="bcp14">MUST NOT</span> be placed in <code>priv</code>.
+Public-key objects <span class="bcp14">MUST NOT</span> contain <code>priv</code>. No <code>crv</code> parameter is
+used.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<span id="name-public-key-and-encapsulated"></span><div id="len-table">
+<table class="center" id="table-3">
+        <caption>
+<a href="#table-3" class="selfRef">Table 3</a>:
+<a href="#name-public-key-and-encapsulated" class="selfRef">Public key and encapsulated key lengths</a>
+        </caption>
+<thead>
+          <tr>
+            <th class="text-left" rowspan="1" colspan="1">HPKE KEM</th>
+            <th class="text-right" rowspan="1" colspan="1">pub (octets)</th>
+            <th class="text-right" rowspan="1" colspan="1">ek (octets)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HQC-1</td>
+            <td class="text-right" rowspan="1" colspan="1">2241</td>
+            <td class="text-right" rowspan="1" colspan="1">4433</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HQC-3</td>
+            <td class="text-right" rowspan="1" colspan="1">4514</td>
+            <td class="text-right" rowspan="1" colspan="1">8978</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HQC-5</td>
+            <td class="text-right" rowspan="1" colspan="1">7237</td>
+            <td class="text-right" rowspan="1" colspan="1">14421</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HQC3-P256</td>
+            <td class="text-right" rowspan="1" colspan="1">4579</td>
+            <td class="text-right" rowspan="1" colspan="1">9043</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HQC3-X25519</td>
+            <td class="text-right" rowspan="1" colspan="1">4546</td>
+            <td class="text-right" rowspan="1" colspan="1">9010</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HQC5-P384</td>
+            <td class="text-right" rowspan="1" colspan="1">7334</td>
+            <td class="text-right" rowspan="1" colspan="1">14518</td>
+          </tr>
+        </tbody>
+      </table>
+</div>
+<p id="section-4-6">Implementations <span class="bcp14">MUST</span> perform the deserialization and consistency checks
 specified by <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>, including rejection of an imported seed and
 public-key pair that do not match. The parameter set <span class="bcp14">MUST</span> be determined
-from <code>alg</code>, not inferred from a byte-string length alone.<a href="#section-4-5" class="pilcrow">¶</a></p>
-<p id="section-4-6">If <code>key_ops</code> (label 4) is present, it <span class="bcp14">MUST</span> be <code>[8]</code> (derive bits) for
+from <code>alg</code>, not inferred from a byte-string length alone.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-7">If <code>key_ops</code> (label 4) is present, it <span class="bcp14">MUST</span> be <code>[8]</code> (derive bits) for
 a private key and <code>[]</code> for a public key, as required by Section 3.4
 of <span>[<a href="#COSE-HPKE" class="cite xref">COSE-HPKE</a>]</span>. This is not a <code>deriveKey</code> permission and does not
-authorize use of the HQC key as a symmetric key.<a href="#section-4-6" class="pilcrow">¶</a></p>
-<p id="section-4-7">AKP thumbprints follow Section 6 of <span>[<a href="#RFC9964" class="cite xref">RFC9964</a>]</span>. They include the
+authorize use of the HQC key as a symmetric key.<a href="#section-4-7" class="pilcrow">¶</a></p>
+<p id="section-4-8">AKP thumbprints follow Section 6 of <span>[<a href="#RFC9964" class="cite xref">RFC9964</a>]</span>. They include the
 COSE algorithm value, so two ciphersuite bindings do not have the same
-thumbprint merely because their public-key bytes are identical.<a href="#section-4-7" class="pilcrow">¶</a></p>
+thumbprint merely because their public-key bytes are identical.<a href="#section-4-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="processing">
@@ -1409,10 +1506,10 @@ and <span class="bcp14">MUST</span> still match the key's mandatory <code>alg</c
 try different suites until one decrypts successfully.<a href="#section-5-2" class="pilcrow">¶</a></p>
 <p id="section-5-3">The <code>ek</code> header <span class="bcp14">MUST</span> contain the raw HPKE <code>enc</code> output as a byte
 string in the unprotected header of the structure performing HPKE.
-Its expected length is 4433, 8978, or 14421 octets for HQC-1, HQC-3,
-or HQC-5. A missing header, incorrect type, or incorrect length <span class="bcp14">MUST</span>
-be rejected before invoking decapsulation. The checks of <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>
-apply in addition to these COSE checks.<a href="#section-5-3" class="pilcrow">¶</a></p>
+Its expected length is given in <a href="#len-table" class="auto internal xref">Table 3</a>. A missing header,
+incorrect type, or incorrect length <span class="bcp14">MUST</span> be rejected before invoking
+decapsulation. The checks of <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span> apply in addition to these
+COSE checks.<a href="#section-5-3" class="pilcrow">¶</a></p>
 <div id="integrated">
 <section id="section-5.1">
         <h3 id="name-integrated-encryption">
@@ -1514,9 +1611,7 @@ stop the operation without releasing content or a CEK.<a href="#section-5.4-1" c
       </h2>
 <p id="section-6-1">The security considerations of <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>, <span>[<a href="#HPKE" class="cite xref">HPKE</a>]</span>, <span>[<a href="#PQ-HPKE" class="cite xref">PQ-HPKE</a>]</span>,
 <span>[<a href="#COSE-HPKE" class="cite xref">COSE-HPKE</a>]</span>, and <span>[<a href="#RFC9052" class="cite xref">RFC9052</a>]</span> apply. This document selects and encodes
-ciphersuites; it does not supply an independent proof of HQC or HPKE.
-Its publication depends on the HQC-to-HPKE review identified in
-<span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>.<a href="#section-6-1" class="pilcrow">¶</a></p>
+ciphersuites; it does not supply an independent proof of HQC or HPKE.<a href="#section-6-1" class="pilcrow">¶</a></p>
 <p id="section-6-2">The protected headers, Recipient_structure, and the distinction
 between HPKE <code>info</code> and <code>aad</code> <span class="bcp14">MUST</span> be handled exactly as specified by
 <span>[<a href="#COSE-HPKE" class="cite xref">COSE-HPKE</a>]</span>. Replacing that structure with the context from another
@@ -1530,8 +1625,8 @@ limits imposed by a content algorithm, KDF, AEAD, PSK, or implementation.<a href
 recipients independently protect the same CEK, either recipient's
 private key is sufficient to recover it. Confidentiality therefore
 depends on every enabled recovery path. Applications requiring security
-when one KEM fails need a separately specified and analyzed hybrid
-construction.<a href="#section-6-4" class="pilcrow">¶</a></p>
+when one KEM fails can use the PQ/T hybrid ciphersuites in
+<a href="#suites" class="auto internal xref">Section 3</a>.<a href="#section-6-4" class="pilcrow">¶</a></p>
 <p id="section-6-5">Base mode does not authenticate the sender. A <code>kid</code> is a lookup hint,
 not a substitute for authenticated public-key distribution. Sender
 authentication can be provided by the PSK mode or suitable COSE-native
@@ -1554,12 +1649,12 @@ ciphertext overhead.<a href="#section-6-7" class="pilcrow">¶</a></p>
       <h2 id="name-iana-considerations">
 <a href="#section-7" class="section-number selfRef">7. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-7-1">IANA is requested to add the following six entries to the "COSE
+<p id="section-7-1">IANA is requested to add the following twelve entries to the "COSE
 Algorithms" registry <span>[<a href="#COSE-IANA" class="cite xref">COSE-IANA</a>]</span>. The entries are fully specified
 by <a href="#suites" class="auto internal xref">Section 3</a>. For every entry, the KDF is HPKE SHAKE256 (0x0011)
 and the AEAD is HPKE AES-256-GCM (0x0002).<a href="#section-7-1" class="pilcrow">¶</a></p>
-<table class="center" id="table-3">
-        <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
+<table class="center" id="table-4">
+        <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
 <thead>
           <tr>
             <th class="text-left" rowspan="1" colspan="1">Name</th>
@@ -1584,6 +1679,21 @@ and the AEAD is HPKE AES-256-GCM (0x0002).<a href="#section-7-1" class="pilcrow"
             <td class="text-left" rowspan="1" colspan="1">Integrated Encryption: HQC-5, SHAKE256, AES-256-GCM</td>
           </tr>
           <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC3-P256</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC3-P256</td>
+            <td class="text-left" rowspan="1" colspan="1">Integrated Encryption: HQC3-P256, SHAKE256, AES-256-GCM</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC3-X25519</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC3-X25519</td>
+            <td class="text-left" rowspan="1" colspan="1">Integrated Encryption: HQC3-X25519, SHAKE256, AES-256-GCM</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC5-P384</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC5-P384</td>
+            <td class="text-left" rowspan="1" colspan="1">Integrated Encryption: HQC5-P384, SHAKE256, AES-256-GCM</td>
+          </tr>
+          <tr>
             <td class="text-left" rowspan="1" colspan="1">HPKE-HQC-1-KE</td>
             <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC-1-KE</td>
             <td class="text-left" rowspan="1" colspan="1">Key Encryption: HQC-1, SHAKE256, AES-256-GCM</td>
@@ -1597,6 +1707,21 @@ and the AEAD is HPKE AES-256-GCM (0x0002).<a href="#section-7-1" class="pilcrow"
             <td class="text-left" rowspan="1" colspan="1">HPKE-HQC-5-KE</td>
             <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC-5-KE</td>
             <td class="text-left" rowspan="1" colspan="1">Key Encryption: HQC-5, SHAKE256, AES-256-GCM</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC3-P256-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC3-P256-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">Key Encryption: HQC3-P256, SHAKE256, AES-256-GCM</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC3-X25519-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC3-X25519-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">Key Encryption: HQC3-X25519, SHAKE256, AES-256-GCM</td>
+          </tr>
+          <tr>
+            <td class="text-left" rowspan="1" colspan="1">HPKE-HQC5-P384-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">TBD-COSE-HQC5-P384-KE</td>
+            <td class="text-left" rowspan="1" colspan="1">Key Encryption: HQC5-P384, SHAKE256, AES-256-GCM</td>
           </tr>
         </tbody>
       </table>
@@ -1615,9 +1740,9 @@ and the AEAD is HPKE AES-256-GCM (0x0002).<a href="#section-7-1" class="pilcrow"
           <p id="section-7-4.4.1">Recommended: No<a href="#section-7-4.4.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
-<p id="section-7-5">The corresponding HPKE KEM ID in each description is the HQC-1,
-HQC-3, or HQC-5 identifier assigned to <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>. Those values
-<span class="bcp14">MUST</span> be resolved in <a href="#suites" class="auto internal xref">Section 3</a> before publication.<a href="#section-7-5" class="pilcrow">¶</a></p>
+<p id="section-7-5">The corresponding HPKE KEM ID in each description is the identifier
+assigned to that KEM by <span>[<a href="#HQC-HPKE" class="cite xref">HQC-HPKE</a>]</span>. Those values <span class="bcp14">MUST</span> be resolved
+in <a href="#suites" class="auto internal xref">Section 3</a> before publication.<a href="#section-7-5" class="pilcrow">¶</a></p>
 <p id="section-7-6">The existing AKP key type and the <code>ek</code> and <code>psk_id</code> parameters
 defined by <span>[<a href="#COSE-HPKE" class="cite xref">COSE-HPKE</a>]</span> are reused.<a href="#section-7-6" class="pilcrow">¶</a></p>
 </section>
@@ -1643,7 +1768,7 @@ defined by <span>[<a href="#COSE-HPKE" class="cite xref">COSE-HPKE</a>]</span> a
 <dd class="break"></dd>
 <dt id="HQC-HPKE">[HQC-HPKE]</dt>
         <dd>
-<span class="refAuthor">Tschofenig, H.</span> and <span class="refAuthor">T. Reddy</span>, <span class="refTitle">"HQC Key Encapsulation for Hybrid Public Key Encryption (HPKE)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-tschofenig-hpke-hqc-00</span>, <time datetime="2026-10-10" class="refDate">10 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-tschofenig-hpke-hqc-00">https://datatracker.ietf.org/doc/html/draft-tschofenig-hpke-hqc-00</a>&gt;</span>. </dd>
+<span class="refAuthor">Tschofenig, H.</span> and <span class="refAuthor">T. Reddy.K</span>, <span class="refTitle">"Hamming Quasi-Cyclic (HQC) Key Encapsulation Mechanisms for Hybrid Public Key Encryption (HPKE)"</span>, <span class="refContent">Work in Progress</span>, <span class="seriesInfo">Internet-Draft, draft-reddy-hpke-hqc-01</span>, <time datetime="2026-10-14" class="refDate">14 October 2026</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-reddy-hpke-hqc-01">https://datatracker.ietf.org/doc/html/draft-reddy-hpke-hqc-01</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="PQ-HPKE">[PQ-HPKE]</dt>
         <dd>
@@ -1679,8 +1804,12 @@ defined by <span>[<a href="#COSE-HPKE" class="cite xref">COSE-HPKE</a>]</span> a
         </h3>
 <dl class="references">
 <dt id="COSE-IANA">[COSE-IANA]</dt>
-      <dd>
+        <dd>
 <span class="refAuthor">IANA</span>, <span class="refTitle">"CBOR Object Signing and Encryption (COSE)"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.iana.org/assignments/cose/">https://www.iana.org/assignments/cose/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC9794">[RFC9794]</dt>
+      <dd>
+<span class="refAuthor">Driscoll, F.</span>, <span class="refAuthor">Parsons, M.</span>, and <span class="refAuthor">B. Hale</span>, <span class="refTitle">"Terminology for Post-Quantum Traditional Hybrid Schemes"</span>, <span class="seriesInfo">RFC 9794</span>, <span class="seriesInfo">DOI 10.17487/RFC9794</span>, <time datetime="2025-06" class="refDate">June 2025</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc9794">https://www.rfc-editor.org/rfc/rfc9794</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 </dl>
 </section>
