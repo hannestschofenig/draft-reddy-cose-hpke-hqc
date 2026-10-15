@@ -1,6 +1,6 @@
 {
   "magic": "E!vIA5L86J2I",
-  "timestamp": "2026-10-13T04:41:33.128333+00:00",
+  "timestamp": "2026-10-15T02:29:20.002073+00:00",
   "repo": "hannestschofenig/draft-reddy-cose-hpke-hqc",
   "labels": [
     {
@@ -55,5 +55,48 @@
     }
   ],
   "issues": [],
-  "pulls": []
+  "pulls": [
+    {
+      "number": 1,
+      "id": "PR_kwDOVEjx0c8AAAABIYpGHw",
+      "title": "Further updates to the draft",
+      "url": "https://github.com/hannestschofenig/draft-reddy-cose-hpke-hqc/pull/1",
+      "state": "MERGED",
+      "author": "tireddy2",
+      "authorAssociation": "COLLABORATOR",
+      "assignees": [],
+      "labels": [],
+      "body": "",
+      "createdAt": "2026-10-14T12:13:10Z",
+      "updatedAt": "2026-10-14T13:27:24Z",
+      "baseRepository": "hannestschofenig/draft-reddy-cose-hpke-hqc",
+      "baseRefName": "main",
+      "baseRefOid": "2654b23b0ac498641b732a423b1bd2833c28e96a",
+      "headRepository": "hannestschofenig/draft-reddy-cose-hpke-hqc",
+      "headRefName": "tireddy2-patch-1",
+      "headRefOid": "1cb38a4db96ee8a12300568772cad860164d4d56",
+      "closedAt": "2026-10-14T13:27:05Z",
+      "mergedAt": "2026-10-14T13:27:05Z",
+      "mergedBy": "hannestschofenig",
+      "mergeCommit": {
+        "oid": "20f7b09a6841a733506294b8ef546d1e4cf21b6e"
+      },
+      "comments": [],
+      "reviews": [
+        {
+          "id": "PRR_kwDOVEjx0c8AAAABSO_Aqw",
+          "commit": {
+            "abbreviatedOid": "1cb38a4"
+          },
+          "author": "hannestschofenig",
+          "authorAssociation": "OWNER",
+          "state": "APPROVED",
+          "body": "Thanks for the update. Given the changes in the other draft the update makes totally sense to me.",
+          "createdAt": "2026-10-14T13:26:57Z",
+          "updatedAt": "2026-10-14T13:26:57Z",
+          "comments": []
+        }
+      ]
+    }
+  ]
 }
